@@ -48,7 +48,7 @@ var findDealerByPostalCode = function(postalCode) {
         spatialFilter : "nearby('" + postalCode + "',1000)",
         "orderBy" : "_distance",
         "$select" : "*,__distance",
-        "$top" : 1,
+        "$top" : 2,
         "$format" : "json",
         key: "{{site.bing-maps-key}}",
         jsonp: "displayDealerSearchResults"
@@ -59,24 +59,29 @@ var findDealerByPostalCode = function(postalCode) {
 }
 
 var displayDealerSearchResults = function(data){
-    var result = data.d.results[0]
+    var htmlResults = ""
 
-    var dealerTemplate = $("#dealerResultTemplate")
-        .html()
-        .replace(/{dealerName}/g, result.DealerName)
-        .replace(/{imageUrl}/g, result.ImageUrl)
-        .replace(/{addressLine}/, result.AddressLine)
-        .replace(/{locality}/, result.Locality)
-        .replace(/{region}/, result.AdminDistrict)
-        .replace(/{postalCode}/, result.PostalCode)
-        .replace(/{phone}/, result.Phone)
-        .replace(/{fax}/, result.Fax)
-        .replace(/{email}/, result.Email)
+    $(data.d.results).each(function() {
+        var result = this
 
-    $(".mbDealerResults").html(dealerTemplate).show()
+        htmlResults += $("#dealerResultTemplate")
+            .html()
+            .replace(/{dealerName}/g, result.DealerName)
+            .replace(/{imageUrl}/g, result.ImageUrl)
+            .replace(/{addressLine}/, result.AddressLine)
+            .replace(/{locality}/, result.Locality)
+            .replace(/{region}/, result.AdminDistrict)
+            .replace(/{postalCode}/, result.PostalCode)
+            .replace(/{phone}/, result.Phone)
+            .replace(/{fax}/, result.Fax)
+            .replace(/{email}/, result.Email)
+    })
+
+    $(".mbDealerResults").html(htmlResults).show()
     $(".mbDealerTryAgain").show()
     $(".mbDealerRequest").hide()
 
+    /*
     $(".mbDealerMap").each(function() {
         var map = new Microsoft.Maps.Map(this, {
             credentials:"{{site.bing-maps-key}}",
@@ -85,6 +90,7 @@ var displayDealerSearchResults = function(data){
             mapTypeId: Microsoft.Maps.MapTypeId.road
             })
     })
+    */
 }
 
 var MakeServiceRequest = function(request) {
